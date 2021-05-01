@@ -1,0 +1,12 @@
+
+	  // Get ADC value
+	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	  raw = HAL_ADC_GetValue(&hadc1);
+
+	  // Convert to string and print
+	  sprintf(msg, "%hu\r\n", raw);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+
+	  // Pretend we have to do something else for a while
+	  HAL_Delay(1);
