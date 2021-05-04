@@ -65,10 +65,6 @@ extern const uint8_t ROW_20[];
 #define SET_DDRAM_ADDR 0x80				// Set DDRAM address
 
 
-/************************************** Helper macros **************************************/
-#define DELAY(X) HAL_Delay(X)
-
-
 /************************************** LCD Defines **************************************/
 #define LCD_NIB 4			// ?
 #define LCD_BYTE 8			// ?
@@ -86,6 +82,10 @@ typedef enum {
 	LCD_8_BIT_MODE
 } Lcd_ModeTypeDef;
 
+typedef enum {
+	false,
+	true
+} bool;
 
 // ?
 typedef struct {
@@ -100,6 +100,9 @@ typedef struct {
 
 	Lcd_ModeTypeDef mode;
 
+	bool cursor;
+	bool blink;
+
 } Lcd_HandleTypeDef;
 
 
@@ -111,8 +114,13 @@ void Lcd_cursor(Lcd_HandleTypeDef *lcd, uint8_t row, uint8_t col);
 Lcd_HandleTypeDef Lcd_create(
 		Lcd_PortType port[], Lcd_PinType pin[],
 		Lcd_PortType rs_port, Lcd_PinType rs_pin,
-		Lcd_PortType en_port, Lcd_PinType en_pin, Lcd_ModeTypeDef mode);
+		Lcd_PortType en_port, Lcd_PinType en_pin,
+		Lcd_ModeTypeDef mode,
+		bool cursor,
+		bool blink);
 void Lcd_define_char(Lcd_HandleTypeDef *lcd, uint8_t code, uint8_t bitmap[]);
 void Lcd_clear(Lcd_HandleTypeDef *lcd);
+void Lcd_toggle_cursor(Lcd_HandleTypeDef *lcd);
+void Lcd_toggle_blink(Lcd_HandleTypeDef *lcd);
 
 #endif /* DUINOTECH_LCD_LCD_H_ */

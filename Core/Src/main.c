@@ -112,12 +112,15 @@ int main(void)
 		  ports, pins,
 		  GPIOA, LCD_RS_Pin,
 		  LCD_Enable_GPIO_Port, LCD_Enable_Pin,
-		  LCD_4_BIT_MODE
+		  LCD_4_BIT_MODE,
+		  false,
+		  false
 		  );
 
-  Lcd_string(&lcd, "Hello, World!");
-  Lcd_cursor(&lcd, 1, 1);
+  Lcd_string(&lcd, "Sam's Test LCD >");
+  Lcd_cursor(&lcd, 1, 0);
 
+  char msg[10];
 
   /* USER CODE END 2 */
 
@@ -126,7 +129,19 @@ int main(void)
   while (1)
   {
 	  if (btn != 0) {
+		  Lcd_cursor(&lcd, 1, 0);
+		  sprintf(msg,"Button %u",btn);
+		  Lcd_string(&lcd, msg);
+
 		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+
+		  if (btn == 1) {
+			  Lcd_toggle_blink(&lcd);
+		  }
+		  else if (btn == 2) {
+			  Lcd_toggle_cursor(&lcd);
+		  }
+
 		  btn = 0;
 	  }
 

@@ -15,9 +15,10 @@ const uint8_t ROW_20[] = {0x00, 0x40, 0x14, 0x54};
 
 
 /************************************** Static declarations **************************************/
-static void lcd_write_data(Lcd_HandleTypeDef * lcd, uint8_t data);
-static void lcd_write_command(Lcd_HandleTypeDef * lcd, uint8_t command);
-static void lcd_write(Lcd_HandleTypeDef * lcd, uint8_t data, uint8_t len);
+static void lcd_write_data(Lcd_HandleTypeDef *lcd, uint8_t data);
+static void lcd_write_command(Lcd_HandleTypeDef *lcd, uint8_t command);
+static void lcd_write_nib_command(Lcd_HandleTypeDef *lcd, uint8_t command);
+static void lcd_write(Lcd_HandleTypeDef *lcd, uint8_t data, uint8_t len);
 
 
 /************************************** Function definitions **************************************/
@@ -27,7 +28,10 @@ static void lcd_write(Lcd_HandleTypeDef * lcd, uint8_t data, uint8_t len);
 Lcd_HandleTypeDef Lcd_create(
 		Lcd_PortType port[], Lcd_PinType pin[],
 		Lcd_PortType rs_port, Lcd_PinType rs_pin,
-		Lcd_PortType en_port, Lcd_PinType en_pin, Lcd_ModeTypeDef mode)
+		Lcd_PortType en_port, Lcd_PinType en_pin,
+		Lcd_ModeTypeDef mode,
+		bool cursor,
+		bool blink)
 {
 
 	Lcd_HandleTypeDef lcd;
@@ -43,6 +47,9 @@ Lcd_HandleTypeDef Lcd_create(
 	lcd.data_pin = pin;
 	lcd.data_port = port;
 
+	lcd.cursor = cursor;
+	lcd.blink = blink;
+
 	Lcd_init(&lcd);		// Some sort of pointer to the lcd type def just init
 
 	return lcd;
@@ -54,17 +61,38 @@ Lcd_HandleTypeDef Lcd_create(
 void Lcd_init(Lcd_HandleTypeDef *lcd) {
 	if (lcd->mode == LCD_4_BIT_MODE)	// gets mode from the struct that lcd points to
 	{
-		lcd_write_command(lcd, 0x33);		// 0011 0011 ??
-		lcd_write_command(lcd, 0x32);		// 0011 0010 ??
-		lcd_write_command(lcd, FUNCTION_SET | OPT_N);	// 4-Bit Mode
+		HAL_Delay(50);
+		lcd_write_nib_command(lcd, 0x30);		// Func Set
+		HAL_Delay(5);
+		lcd_write_nib_command(lcd, 0x30);		// Func Set
+		HAL_Delay(1);
+		lcd_write_nib_command(lcd, 0x30);		// Func Set
+
+		lcd_write_nib_command(lcd, FUNCTION_SET);			// Func Set 4-Bit
+		lcd_write_command(lcd, FUNCTION_SET | OPT_N);	// Func Set 4-Bit Mode, 2 Lines
+
+		lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL);	// Display OFF
 	}
 	else {
 		lcd_write_command(lcd, FUNCTION_SET | OPT_DL | OPT_N); // ?
 	}
 
 	lcd_write_command(lcd, CLEAR_DISPLAY);						// Clear Display
-	lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D);		// LCD-On, Cursor-Off, No-Blink
 	lcd_write_command(lcd, ENTRY_MODE_SET | OPT_INC);			// Increment Cursor?
+
+	// Checking for Cursor and Blink, could change and use a variable
+	if ((lcd->blink == true) && (lcd->cursor == true)) {
+		lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_C | OPT_B);
+	}
+	else if ((lcd->blink == true) && (lcd->cursor == false)) {
+		lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_B);
+	}
+	else if ((lcd->blink == false) && (lcd->cursor == true)) {
+		lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_C);
+	}
+	else {
+		lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D);
+	}
 }
 
 /**
@@ -120,6 +148,62 @@ void Lcd_define_char(Lcd_HandleTypeDef *lcd, uint8_t code, uint8_t bitmap[]){
 
 }
 
+/**
+ * Toggle the Cursor
+ */
+void Lcd_toggle_cursor(Lcd_HandleTypeDef *lcd) {
+	if (lcd->cursor == true) {
+		if (lcd->blink == true) {
+			// Turn off cursor, keeping blink on
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_B);
+		}
+		else {
+			// Turn off cursor, keeping blink off
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D );
+		}
+		lcd->cursor = false;
+	}
+	else if (lcd->cursor == false) {
+		if (lcd->blink == true) {
+			// Turn on cursor, keeping blink on
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_B | OPT_C);
+		}
+		else {
+			// Turn on cursor, keeping blink off
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_C);
+		}
+		lcd->cursor = true;
+	}
+}
+
+/**
+ * Toggle Blinking
+ */
+void Lcd_toggle_blink(Lcd_HandleTypeDef *lcd) {
+	if (lcd->blink == true) {
+		if (lcd->cursor == true) {
+			// Turn off blink, keeping cursor on
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_C);
+		}
+		else {
+			// Turn off blink, keeping cursor off
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D);
+		}
+		lcd->blink = false;
+	}
+	else if (lcd->blink == false) {
+		if (lcd->cursor == true) {
+			// Turn on blink, keeping cursor on
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_C | OPT_B);
+		}
+		else {
+			// Turn on blink, keeping cursor off
+			lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D | OPT_B);
+		}
+		lcd->blink = true;
+	}
+}
+
 
 /************************************** Static function definition **************************************/
 /**
@@ -167,6 +251,23 @@ void lcd_write(Lcd_HandleTypeDef *lcd, uint8_t data, uint8_t len) {
 	}
 
 	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, 1);
-	DELAY(1);
+	HAL_Delay(1);
 	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, 0); 		// Data receive on falling edge
 }
+
+/**
+ * Writes a single 4-bit (NIB) command using the MSB of the uint
+ */
+void lcd_write_nib_command(Lcd_HandleTypeDef *lcd, uint8_t command) {
+
+	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, LCD_COMMAND_REG);	// Write to Command Register
+
+	if (lcd->mode == LCD_4_BIT_MODE) {
+		// Writing Command in two seperate nibs due to 4 Bit Mode
+		lcd_write(lcd, (command >> 4), LCD_NIB);	// Send 4 MSB
+	}
+	else {
+		// Do Nothing
+	}
+}
+
