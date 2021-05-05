@@ -7,8 +7,8 @@
  *      Author: sam
  */
 
-#ifndef DUINOTECH_LCD_LCD_H_
-#define DUINOTECH_LCD_LCD_H_
+#ifndef SRC_HD44780_LCD_H_
+#define SRC_HD44780_LCD_H_
 
 #include "stm32l4xx_hal.h"
 #include "string.h"

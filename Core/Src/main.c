@@ -24,7 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-#include "Duinotech LCD/lcd.h"
+#include "HD44780/lcd.h"
 
 /* USER CODE END Includes */
 
@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-uint16_t btn = 0;
+uint16_t btn_flag = 0;
 
 /* USER CODE END PD */
 
@@ -128,21 +128,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (btn != 0) {
+	  if (btn_flag != 0) {
 		  Lcd_cursor(&lcd, 1, 0);
-		  sprintf(msg,"Button %u",btn);
+		  sprintf(msg,"Button %u",btn_flag);
 		  Lcd_string(&lcd, msg);
 
 		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
-		  if (btn == 1) {
-			  Lcd_toggle_blink(&lcd);
+		  if (btn_flag == 1) {
+//			  Lcd_toggle_blink(&lcd);
 		  }
-		  else if (btn == 2) {
-			  Lcd_toggle_cursor(&lcd);
+		  else if (btn_flag == 2) {
+//			  Lcd_toggle_cursor(&lcd);
 		  }
 
-		  btn = 0;
+		  btn_flag = 0;
 	  }
 
 
@@ -391,10 +391,10 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	if (GPIO_Pin == BTN1_Pin) {
-		btn = 1;
+		btn_flag = 1;
 	}
 	if (GPIO_Pin == BTN2_Pin) {
-		btn = 2;
+		btn_flag = 2;
 	}
 }
 
