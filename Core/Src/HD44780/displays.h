@@ -8,17 +8,17 @@
 #ifndef SRC_HD44780_DISPLAYS_H_
 #define SRC_HD44780_DISPLAYS_H_
 
-#include "lcd.h"
 
+/************************************** Display typedefs **************************************/
+typedef void (*pfn)();
 
-/************************************** Home Menu typedefs **************************************/
 typedef struct {
-	Lcd_HandleTypeDef *lcd;
 
-	float *distance;
+};
 
-} Home_menuTypeDef;
+typedef struct {
 
+} Home_ScreenTypeDef;
 
 /************************************** Public Functions **************************************/
 
