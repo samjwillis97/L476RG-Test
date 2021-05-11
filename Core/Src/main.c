@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "HD44780/lcd.h"
+#include "HD44780/displays.h"
 
 /* USER CODE END Includes */
 
@@ -35,7 +36,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-uint16_t btn_flag = 0;
 
 /* USER CODE END PD */
 
@@ -46,6 +46,8 @@ uint16_t btn_flag = 0;
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+
+TIM_HandleTypeDef htim17;
 
 UART_HandleTypeDef huart2;
 
@@ -58,12 +60,24 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM17_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// Flag for Button Presses
+uint8_t btn_flag = 0;
+
+// Counter INit
+uint8_t counter = 0;
+
+// Time Elapsed for buttons
+uint32_t last_btn_press;
+
+
 
 /* USER CODE END 0 */
 
@@ -97,9 +111,15 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
+
+  // Start Timer
+  HAL_TIM_Base_Start_IT(&htim17);
+
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 0);
 
+  // Init LCD
   Lcd_PortType ports[] = {
 		  GPIOB, GPIOB, GPIOB, GPIOB
   };
@@ -117,9 +137,17 @@ int main(void)
 		  false
 		  );
 
-  Lcd_string(&lcd, "Sam's Test LCD >");
-  Lcd_cursor(&lcd, 1, 0);
+  // Init Display Module
+  DisplayProcTypeDef display = Display_init(&btn_flag, &lcd);
 
+  // Writing Initial Display for Testing
+  Lcd_cursor(&lcd, 0, 0);
+  Lcd_string(&lcd, "Sam's Test LCD");
+
+  // Initializing Counter for Display
+  uint16_t last_counter = 0;
+
+  // Init string array for printing
   char msg[10];
 
   /* USER CODE END 2 */
@@ -128,22 +156,33 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (btn_flag != 0) {
-		  Lcd_cursor(&lcd, 1, 0);
-		  sprintf(msg,"Button %u",btn_flag);
+//	  if (btn_flag != 0) {
+////		  Lcd_cursor(&lcd, 1, 0);
+////		  sprintf(msg,"Button %u",btn_flag);
+////		  Lcd_string(&lcd, msg);
+////
+////		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+//
+//		  if (btn_flag == 1) {
+////			  Lcd_toggle_blink(&lcd);
+//		  }
+//		  else if (btn_flag == 2) {
+////			  Lcd_toggle_cursor(&lcd);
+//		  }
+//
+//		  btn_flag = 0;
+//	  }
+
+	  Display_update(&display);
+
+	  if ( counter != last_counter) {
+		  Lcd_cursor(&lcd, 1, 6);
+		  sprintf(msg,"%u",counter);
 		  Lcd_string(&lcd, msg);
 
-		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-
-		  if (btn_flag == 1) {
-//			  Lcd_toggle_blink(&lcd);
-		  }
-		  else if (btn_flag == 2) {
-//			  Lcd_toggle_cursor(&lcd);
-		  }
-
-		  btn_flag = 0;
+		  last_counter = counter;
 	  }
+
 
 
     /* USER CODE END WHILE */
@@ -280,6 +319,38 @@ static void MX_ADC1_Init(void)
 }
 
 /**
+  * @brief TIM17 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM17_Init(void)
+{
+
+  /* USER CODE BEGIN TIM17_Init 0 */
+
+  /* USER CODE END TIM17_Init 0 */
+
+  /* USER CODE BEGIN TIM17_Init 1 */
+
+  /* USER CODE END TIM17_Init 1 */
+  htim17.Instance = TIM17;
+  htim17.Init.Prescaler = 8000;
+  htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim17.Init.Period = 1000;
+  htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim17.Init.RepetitionCounter = 0;
+  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM17_Init 2 */
+
+  /* USER CODE END TIM17_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -389,15 +460,23 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-
-	if (GPIO_Pin == BTN1_Pin) {
-		btn_flag = 1;
-	}
-	if (GPIO_Pin == BTN2_Pin) {
-		btn_flag = 2;
+	if ((HAL_GetTick() - last_btn_press) > 100){
+		if (GPIO_Pin == BTN1_Pin) {
+			btn_flag = 1;
+		}
+		if (GPIO_Pin == BTN2_Pin) {
+			btn_flag = 2;
+		}
+		last_btn_press = HAL_GetTick();
 	}
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if (htim == &htim17) {
+//		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		counter += 1;
+	}
+}
 
 /* USER CODE END 4 */
 

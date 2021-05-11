@@ -38,6 +38,12 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+// Button Flag
+extern uint8_t btn_flag;
+
+// Counter for Interrupt Timer
+extern uint8_t counter;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

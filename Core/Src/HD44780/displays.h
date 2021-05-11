@@ -8,19 +8,36 @@
 #ifndef SRC_HD44780_DISPLAYS_H_
 #define SRC_HD44780_DISPLAYS_H_
 
+#include "stm32l4xx_hal.h"
+#include "lcd.h"
+#include "main.h"
+
+
+
+/************************************** Variables **************************************/
+
+// General
+
 
 /************************************** Display typedefs **************************************/
-typedef void (*pfn)();
+//typedef void (*pfn)(void);
 
 typedef struct {
+	// Pointer to Button Flag for presses
+	uint8_t *btn_flag;
 
-};
+	// Pointer to LCD
+	Lcd_HandleTypeDef *lcd;
 
-typedef struct {
+}DisplayProcTypeDef;
 
-} Home_ScreenTypeDef;
 
 /************************************** Public Functions **************************************/
-
+// Function to Action on Buttons
+DisplayProcTypeDef Display_init(
+		uint8_t *btn_flag,
+		Lcd_HandleTypeDef *lcd);
+void Display_update(
+		DisplayProcTypeDef *display);
 
 #endif /* SRC_HD44780_DISPLAYS_H_ */

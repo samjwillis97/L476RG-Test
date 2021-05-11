@@ -1,0 +1,2 @@
+displays.c:26:20:Display_init	32	static
+displays.c:43:6:Display_update	16	static
