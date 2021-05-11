@@ -1,2 +1,7 @@
-displays.c:26:20:Display_init	32	static
-displays.c:43:6:Display_update	16	static
+displays.c:61:6:HomeMenu	8	static
+displays.c:76:6:CounterSettings	8	static
+displays.c:96:6:ResetCounter	8	static
+displays.c:112:20:Display_init	32	static
+displays.c:130:6:Display_update	16	static
+displays.c:223:6:has_var_changed	4	static
+displays.c:235:6:reset_vars	4	static

@@ -42,7 +42,7 @@ extern "C" {
 extern uint8_t btn_flag;
 
 // Counter for Interrupt Timer
-extern uint8_t counter;
+extern uint16_t counter;
 
 /* USER CODE END ET */
 

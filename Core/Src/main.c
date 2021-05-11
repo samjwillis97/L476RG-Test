@@ -72,7 +72,7 @@ static void MX_TIM17_Init(void);
 uint8_t btn_flag = 0;
 
 // Counter INit
-uint8_t counter = 0;
+uint16_t counter = 0;
 
 // Time Elapsed for buttons
 uint32_t last_btn_press;
@@ -140,15 +140,10 @@ int main(void)
   // Init Display Module
   DisplayProcTypeDef display = Display_init(&btn_flag, &lcd);
 
-  // Writing Initial Display for Testing
-  Lcd_cursor(&lcd, 0, 0);
-  Lcd_string(&lcd, "Sam's Test LCD");
 
   // Initializing Counter for Display
-  uint16_t last_counter = 0;
+//  uint16_t last_counter = 0;
 
-  // Init string array for printing
-  char msg[10];
 
   /* USER CODE END 2 */
 
@@ -175,13 +170,11 @@ int main(void)
 
 	  Display_update(&display);
 
-	  if ( counter != last_counter) {
-		  Lcd_cursor(&lcd, 1, 6);
-		  sprintf(msg,"%u",counter);
-		  Lcd_string(&lcd, msg);
-
-		  last_counter = counter;
-	  }
+//	  if ( counter != last_counter) {
+//		  Lcd_u16_right_aligned(&lcd, counter, 1, 15);
+//
+//		  last_counter = counter;
+//	  }
 
 
 
@@ -462,6 +455,7 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if ((HAL_GetTick() - last_btn_press) > 100){
 		if (GPIO_Pin == BTN1_Pin) {
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 			btn_flag = 1;
 		}
 		if (GPIO_Pin == BTN2_Pin) {

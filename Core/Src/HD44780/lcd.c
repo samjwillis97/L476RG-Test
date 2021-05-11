@@ -98,14 +98,52 @@ void Lcd_init(Lcd_HandleTypeDef *lcd) {
 /**
  * Write a number on the current position
  */
-void Lcd_int(Lcd_HandleTypeDef *lcd, int number)
-{
+void Lcd_int(Lcd_HandleTypeDef *lcd, int number) {
 	char buffer[11];
 	sprintf(buffer, "%d", number);
 
 	Lcd_string(lcd, buffer);
 }
 
+void Lcd_u8_right_aligned(Lcd_HandleTypeDef *lcd, uint8_t number, uint8_t row, uint8_t col) {
+	char buffer[4];
+	char input[5];
+	uint8_t i;
+
+	uint8_t len = snprintf(NULL, 0, "%d", number);
+
+	for (i = 0; i < (3 - len); i++) {
+		input[i] = 32;	// space
+	}
+	input[i] = 37;	// percentage
+	input[i+1] = 100;	// d
+	input[i+2] = '\0';	// end of string
+
+	sprintf(buffer, input, number);
+
+	Lcd_cursor(lcd, row, (col - 2));
+	Lcd_string(lcd, buffer);
+}
+
+void Lcd_u16_right_aligned(Lcd_HandleTypeDef *lcd, uint16_t number, uint8_t row, uint8_t col) {
+	char buffer[6];
+	char input[7];
+	uint8_t i;
+
+	uint8_t len = snprintf(NULL, 0, "%d", number);
+
+	for (i = 0; i < (5 - len); i++) {
+		input[i] = 32;	// space
+	}
+	input[i] = 37;	// percentage
+	input[i+1] = 100;	// d
+	input[i+2] = '\0';	// end of string
+
+	sprintf(buffer, input, number);
+
+	Lcd_cursor(lcd, row, (col - 4));
+	Lcd_string(lcd, buffer);
+}
 
 /**
  * Write String in current cursor position
@@ -116,6 +154,18 @@ void Lcd_string(Lcd_HandleTypeDef *lcd, char *string) {
 	}
 }
 
+void Lcd_string_centered (Lcd_HandleTypeDef *lcd, char *string, uint8_t row) {
+	uint8_t len = strlen(string) - 1;
+	uint8_t left_spacing = (15 - len) / 2;
+	Lcd_cursor(lcd, row, left_spacing);
+	Lcd_string(lcd, string);
+}
+
+void Lcd_string_right_aligned (Lcd_HandleTypeDef *lcd, char *string, uint8_t row, uint8_t col) {
+	uint8_t len = strlen(string) - 1;
+	Lcd_cursor(lcd, row, (col - len));
+	Lcd_string(lcd, string);
+}
 /**
  * Set the cursor position
  */
