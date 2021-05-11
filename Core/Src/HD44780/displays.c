@@ -63,7 +63,7 @@ void ResetCounter();
 //		****************
 //
 void HomeMenu() {
-	// Every Menu Must Have
+	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
 
@@ -86,7 +86,7 @@ void HomeMenu() {
 //		****************
 //
 void CounterSettings() {
-	// Every Menu Must Have
+	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
 
@@ -111,7 +111,7 @@ void CounterSettings() {
 //		****************
 //
 void ResetCounter() {
-	// Every Menu Must Have
+	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
 
