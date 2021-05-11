@@ -20,7 +20,8 @@
 
 
 /************************************** Display typedefs **************************************/
-//typedef void (*pfn)(void);
+typedef void (*pfn)();
+
 
 typedef struct {
 	// Pointer to Button Flag for presses

@@ -10,6 +10,15 @@
 #include "lcd.h"
 #include "main.h"
 
+/************************************** Static function declarations **************************************/
+bool has_var_changed();
+void reset_vars();
+
+void HomeMenu();
+void CounterSettings();
+void ResetCounter();
+
+
 /************************************** GLOBALS **************************************/
 
 #define LCD_STRING_MAX 9
@@ -19,14 +28,23 @@
 
 uint8_t no_btn_timout = 30; // s
 
+uint8_t STACK_MAX_SIZE = 10;
+pfn stack[10];
+uint8_t stack_top = -1;
+
 
 /************************************** Menu Variables **************************************/
-char menu_name[LCD_STRING_MAX];
-char prev_menu_name[LCD_STRING_MAX];
-
 uint8_t menu_type;
 
+// Menu Function Pointers
+pfn pCurrentMenu;
+pfn pPreviousMenu;
+
 bool new_menu = false;
+
+// Void Function Pointers;
+pfn pfnc_1;
+pfn pfnc_2;
 
 // U8 Pointers
 uint8_t *pu8_1;
@@ -46,13 +64,6 @@ uint8_t u8_1_prev;
 // U16 Previous
 uint16_t u16_1_prev;
 
-/************************************** Static function declarations **************************************/
-bool has_var_changed();
-void reset_vars();
-
-void HomeMenu();
-void CounterSettings();
-void ResetCounter();
 
 /************************************** Menus **************************************/
 // 	TYPE 0: Simple String and U16 Display
@@ -66,16 +77,20 @@ void HomeMenu() {
 	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
+	pPreviousMenu = pCurrentMenu;
 
 	// Setting Current State
+	pCurrentMenu = HomeMenu;
 	menu_type = 0;
-	strcpy(menu_name, "Home");
 
 	// Setting Required Pointers
 	pu16_1 = &counter;
 
+	// Functions
+	pfnc_1 = CounterSettings;
+
 	// Setting Required Strings
-	strcpy(str_1, "U16 Counter:");
+	strcpy(str_1, "Counter:");
 }
 
 // 	TYPE 1: Three Sub Menu's
@@ -89,12 +104,14 @@ void CounterSettings() {
 	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
+	pPreviousMenu = pCurrentMenu;
 
 	// Setting Current State
+	pCurrentMenu = CounterSettings;
 	menu_type = 1;
-	strcpy(menu_name, "CountSet");
 
 	// Setting Required Pointers
+	pfnc_2 = ResetCounter;
 
 	// Setting Required Strings
 	strcpy(str_1, "Counter");
@@ -110,16 +127,21 @@ void CounterSettings() {
 //	2   Yes           No    4
 //		****************
 //
+// 	Both Buttons 3 and 4, return to pfnc_1
+//
 void ResetCounter() {
 	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
+	pPreviousMenu = pCurrentMenu;
 
 	// Setting Current State
+	pCurrentMenu = ResetCounter;
 	menu_type = 2;
-	strcpy(menu_name, "RstCount");
 
 	// Setting Required Pointers
+	pfnc_1 = CounterSettings;
+
 	pu16_1 = &counter;
 
 }
@@ -151,28 +173,28 @@ void Display_update(DisplayProcTypeDef *display) {
 		switch (menu_type) {
 			case 0:
 				if (*display->btn_flag == 1) {
-					CounterSettings();		// Change to POINTER
+					pfnc_1();		// Change to POINTER
 				}
 
 				break;
 			case 1:
 				if (*display->btn_flag == 1) {
-					HomeMenu();		// Change to POINTER (PREVIOUS MENU)
+					pPreviousMenu();		// Change to POINTER (PREVIOUS MENU)
 				}
 				if (*display->btn_flag == 2) {
-					ResetCounter();	// Change to POINTER
+					pfnc_2();	// Change to POINTER
 				}
 
 				break;
 			case 2:
 				// No
 				if (*display->btn_flag == 4) {
-					CounterSettings(); // Change to Pointer (PREVIOUS MENU)
+					pPreviousMenu(); // Change to Pointer (PREVIOUS MENU)
 				}
 				// Yes
 				if (*display->btn_flag == 2) {
-					*pu16_1 = 0;
-					CounterSettings(); // Change to Pointer (PREVIOUS MENU)
+					*pu16_1 = 0; // Do This Better, Callback? Sub Routine or something?
+					pfnc_1();
 				}
 
 				break;
@@ -250,6 +272,10 @@ bool has_var_changed() {
 }
 
 void reset_vars() {
+	// Func Pointers
+	pfnc_1 = NULL;
+	pfnc_2 = NULL;
+
 	// U8 Pointers
 	pu8_1 = NULL;
 
@@ -264,3 +290,19 @@ void reset_vars() {
 
 }
 
+// https://www.tutorialspoint.com/data_structures_algorithms/stack_program_in_c.htm
+
+bool stack_isfull() {
+	if (stack_top == STACK_MAX_SIZE) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+
+void stack_push(pfn fnc){
+
+}
