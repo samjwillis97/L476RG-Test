@@ -14,6 +14,11 @@
 bool has_var_changed();
 void reset_vars();
 
+bool stack_isempty();
+bool stack_isfull();
+pfn stack_pop();
+void stack_push(pfn fnc);
+
 void HomeMenu();
 void CounterSettings();
 void ResetCounter();
@@ -26,7 +31,7 @@ void ResetCounter();
 
 /************************************** Variables **************************************/
 
-uint8_t no_btn_timout = 30; // s
+uint8_t no_btn_timout = 30; // s, if greater than 0 use to return home, clear stack
 
 uint8_t STACK_MAX_SIZE = 10;
 pfn stack[10];
@@ -37,6 +42,7 @@ uint8_t stack_top = -1;
 uint8_t menu_type;
 
 // Menu Function Pointers
+pfn pHomeMenu;
 pfn pCurrentMenu;
 pfn pPreviousMenu;
 
@@ -161,6 +167,7 @@ DisplayProcTypeDef Display_init(
 	display.lcd = lcd;
 
 	// Initialize as Home Screen
+	pHomeMenu = HomeMenu;
 	HomeMenu();
 
 	return display;
@@ -292,17 +299,43 @@ void reset_vars() {
 
 // https://www.tutorialspoint.com/data_structures_algorithms/stack_program_in_c.htm
 
-bool stack_isfull() {
-	if (stack_top == STACK_MAX_SIZE) {
+bool stack_isempty() {
+	if (stack_top == -1) {
 		return true;
-	}
-	else {
+	} else {
 		return false;
 	}
 }
 
 
+bool stack_isfull() {
+	if (stack_top == STACK_MAX_SIZE) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
-void stack_push(pfn fnc){
 
+pfn stack_peek() {
+   return stack[stack_top];
+}
+
+
+pfn stack_pop() {
+	pfn data;
+
+	if (stack_isempty() == false) {
+		data = stack[stack_top];
+		stack_top = stack_top - 1;
+		return data;
+	}
+}
+
+
+void stack_push(pfn fnc) {
+	if (stack_isfull() == false) {
+		stack_top = stack_top + 1;
+		stack[stack_top] = fnc;
+	}
 }
