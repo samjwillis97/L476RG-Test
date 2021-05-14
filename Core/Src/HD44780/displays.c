@@ -14,10 +14,12 @@
 bool has_var_changed();
 void reset_vars();
 
-bool stack_isempty();
-bool stack_isfull();
-pfn stack_pop();
-void stack_push(pfn fnc);
+void reset_counter();
+
+bool history_isempty();
+bool history_isfull();
+pfn history_pop();
+void history_push(pfn fnc);
 
 void HomeMenu();
 void CounterSettings();
@@ -31,11 +33,12 @@ void ResetCounter();
 
 /************************************** Variables **************************************/
 
-uint8_t no_btn_timout = 30; // s, if greater than 0 use to return home, clear stack
+uint8_t no_btn_timeout = 10; // s, if greater than 0 use to return home, clear history
+uint32_t last_btn;
 
-uint8_t STACK_MAX_SIZE = 10;
-pfn stack[10];
-uint8_t stack_top = -1;
+uint8_t HISTORY_MAX_SIZE = 10;
+pfn history[10];
+uint8_t history_top = -1;
 
 
 /************************************** Menu Variables **************************************/
@@ -44,7 +47,7 @@ uint8_t menu_type;
 // Menu Function Pointers
 pfn pHomeMenu;
 pfn pCurrentMenu;
-pfn pPreviousMenu;
+pfn GoTo;
 
 bool new_menu = false;
 
@@ -83,7 +86,6 @@ void HomeMenu() {
 	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
-	pPreviousMenu = pCurrentMenu;
 
 	// Setting Current State
 	pCurrentMenu = HomeMenu;
@@ -93,6 +95,7 @@ void HomeMenu() {
 	pu16_1 = &counter;
 
 	// Functions
+	// pfnc_1 always goes to a settings menu
 	pfnc_1 = CounterSettings;
 
 	// Setting Required Strings
@@ -110,13 +113,14 @@ void CounterSettings() {
 	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
-	pPreviousMenu = pCurrentMenu;
 
 	// Setting Current State
 	pCurrentMenu = CounterSettings;
 	menu_type = 1;
 
 	// Setting Required Pointers
+	// btn 1 will go back
+	// pfnc_2 -> 4 always go to another setting screen
 	pfnc_2 = ResetCounter;
 
 	// Setting Required Strings
@@ -139,16 +143,14 @@ void ResetCounter() {
 	// Every Menu Must Have, once pointers make this a function
 	reset_vars();
 	new_menu = true;
-	pPreviousMenu = pCurrentMenu;
 
 	// Setting Current State
 	pCurrentMenu = ResetCounter;
 	menu_type = 2;
 
 	// Setting Required Pointers
-	pfnc_1 = CounterSettings;
-
-	pu16_1 = &counter;
+	// pfnc_1 is run if yes is pressed
+	pfnc_1 = reset_counter;
 
 }
 
@@ -177,31 +179,43 @@ void Display_update(DisplayProcTypeDef *display) {
 
 	// Button Checker - Make Better, add timeout to return home
 	if (*display->btn_flag != 0) {
+		last_btn = HAL_GetTick();
 		switch (menu_type) {
 			case 0:
 				if (*display->btn_flag == 1) {
-					pfnc_1();		// Change to POINTER
+					history_push(pCurrentMenu);
+					pfnc_1();
 				}
 
 				break;
 			case 1:
 				if (*display->btn_flag == 1) {
-					pPreviousMenu();		// Change to POINTER (PREVIOUS MENU)
+					GoTo = history_pop();
+					GoTo();
+
 				}
 				if (*display->btn_flag == 2) {
-					pfnc_2();	// Change to POINTER
+					history_push(pCurrentMenu);
+					pfnc_2();
 				}
 
 				break;
 			case 2:
+				// Back, Do Nothing
+				if (*display->btn_flag == 1) {
+					GoTo = history_pop();
+					GoTo();
+				}
 				// No
 				if (*display->btn_flag == 4) {
-					pPreviousMenu(); // Change to Pointer (PREVIOUS MENU)
+					GoTo = history_pop();
+					GoTo();
 				}
 				// Yes
 				if (*display->btn_flag == 2) {
-					*pu16_1 = 0; // Do This Better, Callback? Sub Routine or something?
-					pfnc_1();
+					pfnc_1(); // Do This Better, Callback? Sub Routine or something?
+					GoTo = history_pop();
+					GoTo();
 				}
 
 				break;
@@ -261,6 +275,14 @@ void Display_update(DisplayProcTypeDef *display) {
 		}
 	}
 
+	if (pCurrentMenu != pHomeMenu) {
+		if ((no_btn_timeout) > 0 && ((HAL_GetTick() - last_btn) > (no_btn_timeout * 1000))) {
+			// ONLY IF NOT ON HOME SCREEN
+			history_top = -1; 	// essentially clears history
+			pHomeMenu();
+		}
+	}
+
 }
 
 
@@ -297,10 +319,14 @@ void reset_vars() {
 
 }
 
+void reset_counter () {
+	counter = 0;
+}
+
 // https://www.tutorialspoint.com/data_structures_algorithms/stack_program_in_c.htm
 
-bool stack_isempty() {
-	if (stack_top == -1) {
+bool history_isempty() {
+	if (history_top == -1) {
 		return true;
 	} else {
 		return false;
@@ -308,8 +334,8 @@ bool stack_isempty() {
 }
 
 
-bool stack_isfull() {
-	if (stack_top == STACK_MAX_SIZE) {
+bool history_isfull() {
+	if (history_top == HISTORY_MAX_SIZE) {
 		return true;
 	} else {
 		return false;
@@ -317,25 +343,26 @@ bool stack_isfull() {
 }
 
 
-pfn stack_peek() {
-   return stack[stack_top];
+pfn history_peek() {
+   return history[history_top];
 }
 
 
-pfn stack_pop() {
+pfn history_pop() {
 	pfn data;
 
-	if (stack_isempty() == false) {
-		data = stack[stack_top];
-		stack_top = stack_top - 1;
+	if (history_isempty() == false) {
+		data = history[history_top];
+		history_top = history_top - 1;
 		return data;
 	}
+	return pHomeMenu;
 }
 
 
-void stack_push(pfn fnc) {
-	if (stack_isfull() == false) {
-		stack_top = stack_top + 1;
-		stack[stack_top] = fnc;
+void history_push(pfn fnc) {
+	if (history_isfull() == false) {
+		history_top = history_top + 1;
+		history[history_top] = fnc;
 	}
 }
