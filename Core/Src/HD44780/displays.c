@@ -11,19 +11,29 @@
 #include "main.h"
 
 /************************************** Static function declarations **************************************/
+// Pointer Specific
 bool has_var_changed();
 void reset_vars();
 
+// Variable Specific
 void reset_counter();
 
+// History Stack
 bool history_isempty();
 bool history_isfull();
 pfn history_pop();
 void history_push(pfn fnc);
 
+// Menus
 void HomeMenu();
 void CounterSettings();
 void ResetCounter();
+
+// Main Functions
+
+void checkButtons();
+void updateNewMenu();
+void updateVarChange();
 
 
 /************************************** GLOBALS **************************************/
@@ -262,7 +272,6 @@ void Display_update(DisplayProcTypeDef *display) {
 	}
 
 
-	// Update Display (Continuous)
 	if (has_var_changed() == true){
 		// Update Display
 		switch (menu_type) {
@@ -281,12 +290,20 @@ void Display_update(DisplayProcTypeDef *display) {
 			history_top = -1; 	// essentially clears history
 			pHomeMenu();
 		}
+
 	}
 
 }
 
 
 /************************************** Static function definition **************************************/
+// Main Functions
+// Check Buttons and Act
+void checkButtons() {
+
+}
+
+// Pointer Specific Functions
 
 bool has_var_changed() {
 	if (*pu8_1 != u8_1_prev) {
@@ -319,10 +336,13 @@ void reset_vars() {
 
 }
 
+// Variable Specific Functions
+
 void reset_counter () {
 	counter = 0;
 }
 
+// HISTORY STACK IMPLEMENTATION
 // https://www.tutorialspoint.com/data_structures_algorithms/stack_program_in_c.htm
 
 bool history_isempty() {
