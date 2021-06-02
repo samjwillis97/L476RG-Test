@@ -108,7 +108,7 @@ uint16_t u16_1_temp;
 //	2             pu16_1    4
 //		****************
 //
-//	Button 1 goes to pfnc_1
+//	Button 1, goes to pfnc_1
 //	Display and Updates pu16_1
 //
 void HomeMenu() {
@@ -138,10 +138,10 @@ void HomeMenu() {
 //	2   str_2      str_4    4
 //		****************
 //
-//	Button 1 returns to Previous
-//	Button 2 goes to pfnc_2
-//	Button 3 goes to pfnc_3
-//	Button 4 goes to pfnc_4
+//	Button 1, returns to Previous
+//	Button 2, goes to pfnc_2
+//	Button 3, goes to pfnc_3
+//	Button 4, goes to pfnc_4
 //
 void CounterSettings() {
 	// Every Menu Must Have, once pointers make this a function
@@ -172,9 +172,8 @@ void CounterSettings() {
 //	2   Yes           No    4
 //		****************
 //
-// 	Both Buttons 3 and 4, return to previous menu
-//	Button 3 Confirms + Runs pfnc_1, Returns to Previous Menu
-//	Button 4 Returns to Previous Menu
+//	Button 3, Confirms + Runs pfnc_1, Returns to Previous Menu
+//	Button 4, Returns to Previous Menu
 //
 void ResetCounter() {
 	// Every Menu Must Have, once pointers make this a function
@@ -199,10 +198,10 @@ void ResetCounter() {
 //	2   OK    	  u16_2-	4
 //		****************
 //
-// 	Button 1 goes back and does not apply change
-//	Button 2 confirms change and goes back
-//  Button 3 increments by value pu16_2
-// 	Button 4 decrements by value pu16_3
+// 	Button 1, goes back and does not apply change
+//	Button 2, confirms change and goes back
+//  Button 3, increments by value pu16_2
+// 	Button 4, decrements by value pu16_3
 //
 void ChangeIncrement() {
 	// Every Menu Must Have, once pointers make this a function
