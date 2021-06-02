@@ -110,6 +110,7 @@ typedef struct {
 void Lcd_init(Lcd_HandleTypeDef *lcd);
 void Lcd_int(Lcd_HandleTypeDef *lcd, int number);
 void Lcd_u8_right_aligned(Lcd_HandleTypeDef *lcd, uint8_t number, uint8_t row, uint8_t col);
+void Lcd_u16_left_aligned(Lcd_HandleTypeDef *lcd, uint16_t number, uint8_t row, uint8_t col);
 void Lcd_u16_right_aligned(Lcd_HandleTypeDef *lcd, uint16_t number, uint8_t row, uint8_t col);
 void Lcd_string(Lcd_HandleTypeDef *lcd, char *string);
 void Lcd_string_centered(Lcd_HandleTypeDef *lcd, char *string, uint8_t row);

@@ -125,6 +125,30 @@ void Lcd_u8_right_aligned(Lcd_HandleTypeDef *lcd, uint8_t number, uint8_t row, u
 	Lcd_string(lcd, buffer);
 }
 
+
+void Lcd_u16_left_aligned(Lcd_HandleTypeDef *lcd, uint16_t number, uint8_t row, uint8_t col) {
+	char buffer[6];
+	char input[7];
+	uint8_t i;
+
+	uint8_t len = snprintf(NULL, 0, "%d", number);
+
+	input[0] = 37;	// percentage
+	input[1] = 100;	// d
+
+	for (i = 0; i < (7 - len); i++) {
+		input[i+2] = 32;	// space
+	}
+
+	input[i] = '\0';	// end of string
+
+	sprintf(buffer, input, number);
+
+	Lcd_cursor(lcd, row, col);
+	Lcd_string(lcd, buffer);
+}
+
+
 void Lcd_u16_right_aligned(Lcd_HandleTypeDef *lcd, uint16_t number, uint8_t row, uint8_t col) {
 	char buffer[6];
 	char input[7];

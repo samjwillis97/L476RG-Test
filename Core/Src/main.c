@@ -73,6 +73,7 @@ uint8_t btn_flag = 0;
 
 // Counter INit
 uint16_t counter = 0;
+uint16_t increment = 1;
 
 // Time Elapsed for buttons
 uint32_t last_btn_press;
@@ -435,11 +436,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BTN1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : BTN2_Pin */
-  GPIO_InitStruct.Pin = BTN2_Pin;
+  /*Configure GPIO pins : BTN2_Pin BTN4_Pin BTN3_Pin */
+  GPIO_InitStruct.Pin = BTN2_Pin|BTN4_Pin|BTN3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(BTN2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
@@ -459,7 +460,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			btn_flag = 1;
 		}
 		if (GPIO_Pin == BTN2_Pin) {
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 			btn_flag = 2;
+		}
+		if (GPIO_Pin == BTN3_Pin) {
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+			btn_flag = 3;
+		}
+		if (GPIO_Pin == BTN4_Pin) {
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+			btn_flag = 4;
 		}
 		last_btn_press = HAL_GetTick();
 	}
@@ -468,7 +478,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if (htim == &htim17) {
 //		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		counter += 1;
+		counter += increment;
 	}
 }
 

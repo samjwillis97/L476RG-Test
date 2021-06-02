@@ -43,6 +43,7 @@ extern uint8_t btn_flag;
 
 // Counter for Interrupt Timer
 extern uint16_t counter;
+extern uint16_t increment;
 
 /* USER CODE END ET */
 
@@ -97,6 +98,12 @@ void Error_Handler(void);
 #define BTN2_Pin GPIO_PIN_6
 #define BTN2_GPIO_Port GPIOB
 #define BTN2_EXTI_IRQn EXTI9_5_IRQn
+#define BTN4_Pin GPIO_PIN_8
+#define BTN4_GPIO_Port GPIOB
+#define BTN4_EXTI_IRQn EXTI9_5_IRQn
+#define BTN3_Pin GPIO_PIN_9
+#define BTN3_GPIO_Port GPIOB
+#define BTN3_EXTI_IRQn EXTI9_5_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
